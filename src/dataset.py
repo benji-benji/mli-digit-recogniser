@@ -55,11 +55,11 @@ def get_mnist_dataloaders(batch_size=128):
 
     # Create dataloaders:
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     # use the Dataloader module to wrap around the datasets, loading in batches of 128
     # shuffle for the training set to avoid overfitting
     # leave unshuffled for the testing set for reproduceability
 
     # return dataloaders:
-    return train_loader, test_loader
+    return train_dataloader, test_dataloader

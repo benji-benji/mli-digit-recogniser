@@ -77,3 +77,8 @@ This command creates a copy of `.env.example` and names it `.env`, allowing you 
 ```
 
 --------
+
+Comments / Notes 
+
+ 
+
