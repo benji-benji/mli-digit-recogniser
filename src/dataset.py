@@ -37,7 +37,11 @@ def get_mnist_dataloaders(batch_size=128):
     (Training Dataloader, Testing Dataloader)
 
     """
-    transform = transforms.Compose([transforms.ToTensor()])
+    transform = transforms.Compose([
+    transforms.Resize((224, 224)),  # Resize MNIST images for ResNet
+    transforms.ToTensor(),
+    transforms.Normalize((0.1307,), (0.3081,)),  # Standard MNIST normalization
+    ])
     # transforms input images from PIL format to PyTorch tensors.
     # uses .Compose from the transforms module to create a transformation pipeline
 
