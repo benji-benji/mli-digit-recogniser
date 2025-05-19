@@ -131,7 +131,20 @@ def test_get_mnist_dataloaders_1():
     check the function returns dataloaders 
      '''
     train_loader, test_loader = get_mnist_dataloaders(batch_size=128)
-    
+    # run function and assign the items in tuple to variables 
     assert isinstance(train_loader, DataLoader)
     assert isinstance(test_loader, DataLoader)
+    # check variables are correct object types ( Dataloader)
+
+def test_get_mnist_dataloaders_2():
+    '''Check if images and labels from dataloader have expected shapes
     
+    iterate and check the function returns correctly shaped batches 
+    '''
+    
+    train_loader, _ = get_mnist_dataloaders(batch_size=128)
+    
+    x, y = next(iter(train_loader))
+    
+    assert x.shape == (128, 1, 28, 28)
+    assert y.shape == (128,)
