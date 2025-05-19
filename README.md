@@ -1,4 +1,12 @@
-# Data Project Template
+MLI Digit Recogniser 
+
+Author / Context 
+
+Description 
+
+Explanation 
+
+Dependencies / Prerequisites 
 
 --------
 
