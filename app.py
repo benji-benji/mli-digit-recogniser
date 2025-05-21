@@ -3,6 +3,8 @@ import numpy as np
 from PIL import Image
 import pandas as pd
 import torch
+import psycopg2
+from datetime import datetime
 import torchvision.transforms as transforms
 from src.modeling.predict import predict_single_image
 from streamlit_drawable_canvas import st_canvas
@@ -21,6 +23,7 @@ def load_model():
     return model, device
 
 model, device = load_model()
+pred =()
 
 st.title("MNIST Digit Recogniser")
 
@@ -41,6 +44,25 @@ preprocess = transforms.Compose([
         transforms.Normalize((0.1307,), (0.3081,)),
         ])
 
+def log_prediction(pred, actual):
+    try:
+        conn = psycopg2.connect(
+            dbname="digitdb",
+            user="digituser",
+            password="digitpass",
+            host="localhost"
+        )
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO prediction_logs (predicted_digit, actual_digit) VALUES (%s, %s)",
+            (pred, actual)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        st.error(f"Failed to log prediction: {e}")
+
 if canvas_result.image_data is not None:
     img = Image.fromarray(canvas_result.image_data.astype('uint8')).convert("L")
     
@@ -53,3 +75,4 @@ if canvas_result.image_data is not None:
 
         st.write(f"Model prediction: **{pred}**")
         st.write(f"Your label: **{label}**")
+        log_prediction(pred, label)
