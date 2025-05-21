@@ -1,27 +1,19 @@
 import streamlit as st
 import numpy as np
+from PIL import Image
 import pandas as pd
+from streamlit_drawable_canvas import st_canvas
+from src.modeling.train import get_resnet18_mnist
 
-st.write("Hello world")
+st.title("MNIST Digit Recogniser")
 
-"""
-# My first app
-Here's our first attempt at using data to create a table:
-"""
-
-df = pd.DataFrame({"first column": [1, 2, 3, 4], "second column": [10, 20, 30, 40]})
-
-df
-
-dataframe = np.random.randn(10, 20)
-st.dataframe(dataframe)
-
-dataframe2 = pd.DataFrame(
-    np.random.randn(10, 20), columns=("col %d" % i for i in range(20))
+canvas_result = st_canvas(
+    fill_color="black",  # Black background
+    stroke_width=15,
+    stroke_color="white",  # White digit
+    background_color="black",
+    height=224,
+    width=224,
+    drawing_mode="freedraw",
+    key="canvas",
 )
-
-st.dataframe(dataframe2.style.highlight_max(axis=0))
-
-chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
-
-st.line_chart(chart_data)
