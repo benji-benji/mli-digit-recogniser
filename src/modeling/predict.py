@@ -17,14 +17,17 @@ def predict_single_image(image_path, model_path="models/resnet18_mnist.pth", dev
     """
     # Set device
     if device is None:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if torch.backends.mps.is_available():
+            device = torch.device("mps")
+        else:
+            device = torch.device("cpu")
 
     if transform is None:
         # Default transform if not provided
         transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
+        transforms.Resize((64, 64)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,)),
         ])
 
     # load and preprocess image 

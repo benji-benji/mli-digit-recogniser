@@ -1,5 +1,6 @@
 import torch
 import os
+from tqdm import tqdm
 from torchvision import transforms
 from torchvision.models import resnet18
 import torch.nn as nn
@@ -43,26 +44,34 @@ def get_resnet18_mnist():
     model.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
     return model
 
-def train_model(epochs=12, batch_size=128, model_path="models/resnet18_mnist.pth"):
+def train_model(epochs=12, batch_size=128,device=None, model_path="models/resnet18_mnist.pth"):
     
     '''Training Function 
     
     Loops training data in batches of 128 images,
+    applies transformations to each image,
+    trains the model for specified number of epochs,
     calculates loss, back propogates and then optomises weights 
     saves the updated parameters   
     
     '''
     
     transform = transforms.Compose([
-    transforms.Resize((224, 224)),  # Resize MNIST images for ResNet
+    transforms.Resize((64, 64)),
     transforms.ToTensor(),
-    transforms.Normalize((0.1307,), (0.3081,)),  # Standard MNIST normalization
+    transforms.Normalize((0.1307,), (0.3081,)),
     ])
     # transforms input images from PIL format to PyTorch tensors.
     # uses .Compose from the transforms module to create a transformation pipeline
     
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Set device
+    if device is None:
+        if torch.backends.mps.is_available():
+            device = torch.device("mps")
+        else:
+            device = torch.device("cpu")
     # assign device if GPU is available use it, if not use cpu
+    
     train_loader, test_loader = get_mnist_dataloaders(batch_size)
     # get dataloaders with transformation applied 
     
@@ -75,24 +84,6 @@ def train_model(epochs=12, batch_size=128, model_path="models/resnet18_mnist.pth
     
     #start training loop 
     for epoch in range(epochs):
-        ''' Training loop
-        
-        initalise model and set key variables to 0
-        for each epoch,
-        for each batch in the training data
-        - get the images and labels
-        - move to device
-        - zero the gradients
-        - forward pass
-        - calculate loss
-        - backward pass
-        - update weights
-        - calculate running loss
-        - calculate accuracy
-        - print the loss and accuracy every 128 batches
-        - save the model after 12 epochs
-
-        '''
         
         # initialise model in training mode
         model.train()
@@ -100,8 +91,10 @@ def train_model(epochs=12, batch_size=128, model_path="models/resnet18_mnist.pth
         running_loss, correct, total = 0.0, 0, 0
         
         # loop over images & labels from each batch
+        loop = tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}", leave=False)
         
-        for images, labels in train_loader:
+        # loop over the training data
+        for images, labels in loop:
             
             # move images and labels to device
             images, labels = images.to(device), labels.to(device)
@@ -126,6 +119,8 @@ def train_model(epochs=12, batch_size=128, model_path="models/resnet18_mnist.pth
             _, predicted = outputs.max(1)
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
+            
+            loop.set_postfix(loss=running_loss / (total / batch_size), acc=100. * correct / total)
             
             # print loss and accuracy
         print(f"Epoch [{epoch+1}/{epochs}] - Loss: {running_loss / len(train_loader):.4f} - Accuracy: {100 * correct / total:.2f}%")

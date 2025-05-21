@@ -120,7 +120,8 @@ def test_train_model_updates_weights():
         # Compare with new weights
         updated_weights = dummy_model[1].weight.detach()
 
-        assert not torch.equal(initial_weights, updated_weights)
+        assert not torch.equal(initial_weights, updated_weights.cpu())
+        # Check that weights have changed after training    
 
 
 def test_train_model_prints_loss():

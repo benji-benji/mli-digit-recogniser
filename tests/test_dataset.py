@@ -35,9 +35,9 @@ def test_transform_pipeline():
     import numpy as np
     
     transform = transforms.Compose([
-    transforms.Resize((224, 224)),  # Resize MNIST images for ResNet
+    transforms.Resize((64, 64)),
     transforms.ToTensor(),
-    transforms.Normalize((0.1307,), (0.3081,)),  # Standard MNIST normalization
+    transforms.Normalize((0.1307,), (0.3081,)),
     ])
     # line of code from dataset.py to test 
     
@@ -51,7 +51,7 @@ def test_transform_pipeline():
     
     assert tensor_img.dtype == torch.float32
     # check data type is float32 
-    assert tensor_img.shape == (1, 224, 224)
+    assert tensor_img.shape == (1, 64, 64)
     # check the tensor is correct shape
 
 
@@ -64,9 +64,9 @@ def test_train_dataset():
     check first instance y is a int 
     '''
     transform = transforms.Compose([
-    transforms.Resize((224, 224)),  # Resize MNIST images for ResNet
+    transforms.Resize((64, 64)),
     transforms.ToTensor(),
-    transforms.Normalize((0.1307,), (0.3081,)),  # Standard MNIST normalization
+    transforms.Normalize((0.1307,), (0.3081,)),
     ])
     # line of code from dataset.py to test 
     
@@ -79,7 +79,7 @@ def test_train_dataset():
     # check two variables of first instance 
     assert isinstance(x, torch.Tensor)
     # check data type of x variable (tensor representing handwritten digit)
-    assert x.shape == (1, 224, 224)
+    assert x.shape == (1, 64, 64)
     # check shape of x variable 
     assert isinstance(y, int)
     # check y is integer ( correct digit)
@@ -93,9 +93,9 @@ def test_test_dataset():
     check first instance y is a int 
     '''
     transform = transforms.Compose([
-    transforms.Resize((224, 224)),  # Resize MNIST images for ResNet
+    transforms.Resize((64, 64)),
     transforms.ToTensor(),
-    transforms.Normalize((0.1307,), (0.3081,)),  # Standard MNIST normalization
+    transforms.Normalize((0.1307,), (0.3081,)),
     ])
     
     test_dataset = datasets.MNIST(root="data/raw", train=False, download=True, transform=transform)
@@ -106,7 +106,7 @@ def test_test_dataset():
     # check two variables of first instance 
     assert isinstance(x, torch.Tensor)
     # check data type of x variable (tensor representing handwritten digit)
-    assert x.shape == (1, 224, 224)
+    assert x.shape == (1, 64, 64)
     # check shape of x variable 
     assert isinstance(y, int)
     # check y is integer ( correct digit)
@@ -121,9 +121,9 @@ def test_dataloader_batching():
     
     '''
     transform = transforms.Compose([
-    transforms.Resize((224, 224)),  # Resize MNIST images for ResNet
+    transforms.Resize((64, 64)),
     transforms.ToTensor(),
-    transforms.Normalize((0.1307,), (0.3081,)),  # Standard MNIST normalization
+    transforms.Normalize((0.1307,), (0.3081,)),
     ])
     
     train_dataset = datasets.MNIST(root="data/raw", train=True, download=True, transform=transform)
@@ -134,7 +134,7 @@ def test_dataloader_batching():
     # interate over the dummy dataloader, and assign the items in tuple into 2 variables 
     # first for the batch of images
     # second for the batch of corresponding lables 
-    assert test_loader_images.shape == (128, 1, 224, 224)
+    assert test_loader_images.shape == (128, 1, 64, 64)
     # check shape of the image variable 
     assert test_loader_labels.shape == (128,)
     # check shape of the labels variable 
@@ -165,7 +165,7 @@ def test_get_mnist_dataloaders_2():
     
     x, y = next(iter(train_loader))
     
-    assert x.shape == (128, 1, 224, 224)
+    assert x.shape == (128, 1, 64, 64)
     assert y.shape == (128,)
     
 
