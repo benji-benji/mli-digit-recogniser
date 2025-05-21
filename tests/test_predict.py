@@ -52,48 +52,38 @@ def test_predict_single_image_loadimage():
         assert not torch.isnan(img).any(), "Image tensor contains NaNs"
         
 def test_predict_single_image_returns_correct_digit():
-    '''Test predict_single_image returns 7 using dummy model + temp file
-    
-    make a dummy model that always returns 7
-    and a dummy image that is 224x224
-    check the function returns 7
-    '''
+    '''Test predict_single_image returns 7 using dummy model and dummy image'''
 
+    # Dummy model that always predicts class 7
     class DummyModel(nn.Module):
         def forward(self, x):
-            return torch.tensor([[0, 0, 0, 0, 0, 0, 0, 10, 0, 0]], dtype=torch.float)
+            # batch size x 10 classes, output logits with highest at index 7
+            batch_size = x.shape[0]
+            out = torch.zeros(batch_size, 10)
+            out[:, 7] = 10.0  # set class 7 score highest
+            return out
 
     dummy_model = DummyModel()
 
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Resize((64, 64)),
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        dummy_array = np.random.rand(224, 224) * 255
-        dummy_image = Image.fromarray(dummy_array.astype("uint8")).convert("L")
-        dummy_image_path = os.path.join(tmpdir, "dummy_image.png")
-        dummy_image.save(dummy_image_path)
+    # Create a dummy image (224x224 grayscale)
+    dummy_array = (np.random.rand(224, 224) * 255).astype("uint8")
+    dummy_image = Image.fromarray(dummy_array).convert("L")
 
-        dummy_model_path = os.path.join(tmpdir, "dummy_model.pth")
-        torch.save(dummy_model.state_dict(), dummy_model_path)
+    # Call your predict function passing dummy image and dummy model
+    pred = predict_single_image(
+        image=dummy_image,
+        model=dummy_model,
+        device=torch.device("cpu"),
+        transform=transform
+    )
 
-        from src.modeling import predict
-        original_get_model = predict.get_resnet18_mnist
-        predict.get_resnet18_mnist = lambda: dummy_model
-
-        pred = predict.predict_single_image(
-            image_path=dummy_image_path,
-            model_path=dummy_model_path,
-            transform=transform
-        )
-
-        predict.get_resnet18_mnist = original_get_model
-
-        assert pred == 7, f"Expected 7 but got {pred}"
-
+    assert pred == 7, f"Expected 7 but got {pred}"
 
 def test_predict_single_image_with_invalid_image_file():
     '''Test predict_single_image rejects invalid image file
@@ -138,34 +128,7 @@ def test_predict_single_image_with_invalid_image_file():
         assert not os.path.exists(fake_path)
         assert not os.path.exists(dummy_model_path)
 
-def test_predict_single_image_with_missing_path():
-    '''Should raise FileNotFoundError for missing file path.'''
-    dummy_model = torch.nn.Sequential(
-        torch.nn.Flatten(),
-        torch.nn.Linear(224*224, 10)
-    )
 
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])
-
-    # Use obviously non-existent path
-    missing_path = "this/does/not/exist.png"
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        dummy_model_path = os.path.join(tmpdir, "dummy_model.pth")
-        torch.save(dummy_model.state_dict(), dummy_model_path)
-
-        from src.modeling import predict
-        original_get_model = predict.get_resnet18_mnist
-        predict.get_resnet18_mnist = lambda: dummy_model
-
-        with pytest.raises(FileNotFoundError):
-            predict.predict_single_image(missing_path, dummy_model_path, transform=transform)
-
-        predict.get_resnet18_mnist = original_get_model
 
 
 
