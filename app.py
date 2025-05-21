@@ -29,6 +29,11 @@ conn.commit()
 cur.close()
 conn.close()
 
+st.sidebar.title("About")
+st.sidebar.markdown("This is an digit recogniser to classify handwritten digits. It uses a ResNet18 model trained on the MNIST dataset and can predict handwritten digits from 0 to 9. The model accuracy is 99.19% on MNIST testing data. ")
+
+
+
 def load_model():
     
     if torch.backends.mps.is_available():
@@ -45,7 +50,7 @@ model, device = load_model()
 pred =()
 confidence=()
 
-st.title("MNIST Digit Recogniser")
+st.title("Benji's MNIST Digit Recogniser ✍️ 🤖")
 
 canvas_result = st_canvas(
     fill_color="black",  
@@ -87,16 +92,26 @@ def log_prediction(pred, actual, confidence):
 if canvas_result.image_data is not None:
     img = Image.fromarray(canvas_result.image_data.astype('uint8')).convert("L")
     
-    st.image(img, caption="Your drawing", width=112)
+    
     label = st.number_input("Enter the correct digit label (0-9):", min_value=0, max_value=9, step=1)
     
     if st.button("Predict"):
     
         pred, confidence = predict_single_image(img,model,device)
 
-        st.write(f"Model prediction: **{pred}**")
-        st.write(f"Confidence: **{confidence:.2%}**")
-        st.write(f"Your label: **{label}**")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.image(img, caption="Your drawing", width=200)
+
+        with col2:
+            st.success(f"""
+            ### ✅ Prediction Results:
+            - **Model prediction:** {pred}
+            - **Confidence:** {confidence:.2%}
+            - **Your label:** {label}
+            """)
+        
         log_prediction(pred, label, confidence)
 
 def fetch_logs(limit=10):
