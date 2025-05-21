@@ -76,7 +76,7 @@ def test_predict_single_image_returns_correct_digit():
     dummy_image = Image.fromarray(dummy_array).convert("L")
 
     # Call your predict function passing dummy image and dummy model
-    pred = predict_single_image(
+    pred, confidence = predict_single_image(
         image=dummy_image,
         model=dummy_model,
         device=torch.device("cpu"),
@@ -84,6 +84,7 @@ def test_predict_single_image_returns_correct_digit():
     )
 
     assert pred == 7, f"Expected 7 but got {pred}"
+    assert 0.0 <= confidence <= 1.0, "Confidence should be a probability between 0 and 1"
 
 def test_predict_single_image_with_invalid_image_file():
     '''Test predict_single_image rejects invalid image file

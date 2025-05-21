@@ -1,0 +1,29 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8501:8501"
+    depends_on:
+      - db
+    environment:
+      - DB_NAME=digitdb
+      - DB_USER=digituser
+      - DB_PASSWORD=digitpass
+      - DB_HOST=db
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_DB: digitdb
+      POSTGRES_USER: digituser
+      POSTGRES_PASSWORD: digitpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

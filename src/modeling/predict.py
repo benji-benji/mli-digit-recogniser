@@ -2,6 +2,7 @@ import torch
 import torchvision.transforms as transforms
 from PIL import Image
 from src.modeling.train import get_resnet18_mnist
+import torch.nn.functional as F
 
 
 def predict_single_image(image, model, device=None, transform=None):
@@ -56,6 +57,10 @@ def predict_single_image(image, model, device=None, transform=None):
         #img = img.to(device) # move img to device 
         output = model(img) # forward pass
         # get model output
-        pred = output.argmax(dim=1).item()  # get predicted class
+        probs = F.softmax(output, dim=1)
+        confidence, pred = torch.max(probs, dim=1)
+        
+        pred = pred.item()  # get predicted class
+        confidence = confidence.item()
 
-    return pred
+    return pred, confidence

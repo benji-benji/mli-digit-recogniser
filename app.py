@@ -10,6 +10,25 @@ from src.modeling.predict import predict_single_image
 from streamlit_drawable_canvas import st_canvas
 from src.modeling.train import get_resnet18_mnist
 
+conn = psycopg2.connect(
+    dbname="digitdb",
+    user="digituser",
+    password="digitpass",
+    host="db"
+)
+cur = conn.cursor()
+cur.execute("""
+CREATE TABLE IF NOT EXISTS prediction_logs (
+    id SERIAL PRIMARY KEY,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    predicted_digit INTEGER,
+    actual_digit INTEGER
+);
+""")
+conn.commit()
+cur.close()
+conn.close()
+
 def load_model():
     
     if torch.backends.mps.is_available():
@@ -24,6 +43,7 @@ def load_model():
 
 model, device = load_model()
 pred =()
+confidence=()
 
 st.title("MNIST Digit Recogniser")
 
@@ -44,22 +64,23 @@ preprocess = transforms.Compose([
         transforms.Normalize((0.1307,), (0.3081,)),
         ])
 
-def log_prediction(pred, actual):
+def log_prediction(pred, actual, confidence):
     try:
         conn = psycopg2.connect(
             dbname="digitdb",
             user="digituser",
             password="digitpass",
-            host="localhost"
+            host="db"
         )
         cur = conn.cursor()
         cur.execute(
-            "INSERT INTO prediction_logs (predicted_digit, actual_digit) VALUES (%s, %s)",
-            (pred, actual)
+            "INSERT INTO prediction_logs (predicted_digit, actual_digit, confidence) VALUES (%s, %s, %s)",
+            (pred, actual, confidence)
         )
         conn.commit()
         cur.close()
         conn.close()
+    
     except Exception as e:
         st.error(f"Failed to log prediction: {e}")
 
@@ -71,21 +92,22 @@ if canvas_result.image_data is not None:
     
     if st.button("Predict"):
     
-        pred = predict_single_image(img,model,device)
+        pred, confidence = predict_single_image(img,model,device)
 
         st.write(f"Model prediction: **{pred}**")
+        st.write(f"Confidence: **{confidence:.2%}**")
         st.write(f"Your label: **{label}**")
-        log_prediction(pred, label)
+        log_prediction(pred, label, confidence)
 
 def fetch_logs(limit=10):
     conn = psycopg2.connect(
         dbname="digitdb",
         user="digituser",
         password="digitpass",
-        host="localhost",  # or 'db' if in Docker later
+        host="db",
         port="5432"
     )
-    query = f"SELECT timestamp, predicted_digit, actual_digit FROM prediction_logs ORDER BY timestamp DESC LIMIT {limit};"
+    query = f"SELECT timestamp, predicted_digit, actual_digit, confidence FROM prediction_logs ORDER BY timestamp DESC LIMIT {limit};"
    
     df = pd.read_sql(query, conn)
     conn.close()

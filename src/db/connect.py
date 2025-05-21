@@ -5,6 +5,6 @@ def get_connection():
         dbname="digitdb",
         user="digituser",
         password="digitpass",
-        host="localhost",  # later this might change to a Docker service name
+        host="db",  # later this might change to a Docker service name
         port="5432"
     )
