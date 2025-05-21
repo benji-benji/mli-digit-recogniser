@@ -76,3 +76,24 @@ if canvas_result.image_data is not None:
         st.write(f"Model prediction: **{pred}**")
         st.write(f"Your label: **{label}**")
         log_prediction(pred, label)
+
+def fetch_logs(limit=10):
+    conn = psycopg2.connect(
+        dbname="digitdb",
+        user="digituser",
+        password="digitpass",
+        host="localhost",  # or 'db' if in Docker later
+        port="5432"
+    )
+    query = f"SELECT timestamp, predicted_digit, actual_digit FROM prediction_logs ORDER BY timestamp DESC LIMIT {limit};"
+   
+    df = pd.read_sql(query, conn)
+    conn.close()
+    return df
+
+
+
+st.subheader("Last 10 predictions")
+logs_df = fetch_logs(limit=10)
+logs_df['timestamp'] = pd.to_datetime(logs_df['timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
+st.dataframe(logs_df)
