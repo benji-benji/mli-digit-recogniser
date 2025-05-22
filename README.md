@@ -1,6 +1,6 @@
 Machine Learning Institute - Foundation Project 
 
-MNIST Digit Recogniser 
+MNIST Digit Recogniser using ResNet model
 
 By Ben Bethell 
 
