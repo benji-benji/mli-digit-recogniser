@@ -1,16 +1,15 @@
-MLI Digit Recogniser 
+Machine Learning Institute - Foundation Project 
 
-Author / Context 
+MNIST Digit Recogniser 
 
-Description 
+By Ben Bethell 
 
-Explanation 
+Link to Project:
+http://157.180.81.128:8501/
 
-Dependencies / Prerequisites 
 
 --------
 
-Comments / Notes 
 
  
 
